@@ -63,12 +63,12 @@
     const token=++state.request;controller=new AbortController();const ctl=controller;state.busy=true;renderStatus();
     const timeout=setTimeout(()=>ctl.abort(),12000);
     try{
-      const url='https://api.adsb.lol/v2/lat/'+C.BASE.lat+'/lon/'+C.BASE.lon+'/dist/'+state.radius;
+      const url='https://aeroslp-traffic.vmtsj.chatgpt.site/api/aircraft?radius='+state.radius;
       const response=await fetch(url,{mode:'cors',credentials:'omit',cache:'no-store',signal:ctl.signal});
       if(!response.ok)throw new Error(response.status===429?'La fuente limitó temporalmente las consultas. Reintentaremos automáticamente.':'El proveedor ADS-B respondió con error '+response.status+'.');
       const data=C.normalize(await response.json(),Date.now());if(token!==state.request)return;
       state.aircraft=data.aircraft;state.sourceTime=data.sourceTime;state.received=Date.now();state.error='';state.failures=0;
-    }catch(error){if(token!==state.request)return;state.failures++;state.error=error.name==='AbortError'?'La consulta ADS-B agotó el tiempo de espera. Reintentaremos automáticamente.':error instanceof TypeError?'No se pudo conectar con ADSB.lol. Puede ser un problema de red o de acceso del proveedor (CORS). Reintentaremos automáticamente.':error.message;}
+    }catch(error){if(token!==state.request)return;state.failures++;state.error=error.name==='AbortError'?'La consulta ADS-B agotó el tiempo de espera. Reintentaremos automáticamente.':error instanceof TypeError?'No se pudo conectar con el servicio ADS-B. Revise su conexión; reintentaremos automáticamente.':error.message;}
     finally{clearTimeout(timeout);if(token===state.request){state.busy=false;render();if(!document.hidden)timer=setTimeout(refresh,state.failures?Math.min(120000,30000*state.failures):20000);}}
   }
   function openDialog(id){returnFocus=document.activeElement;const d=$(id);if(typeof d.showModal==='function')d.showModal();else d.setAttribute('open','');}

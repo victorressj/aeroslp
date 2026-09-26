@@ -5,7 +5,7 @@ Aplicación web estática para aficionados a la aviación en San Luis Potosí, M
 ## Funciones
 
 - Radar polar con norte arriba y radios de 40, 80, 140 y 200 NM, centrado en 22.25426172, -100.9307605.
-- Posiciones ADS-B de [ADSB.lol](https://www.adsb.lol/docs/open-data/api/), consultadas cada 20 segundos mientras la página permanece visible. Sin claves ni servidor propio.
+- Posiciones ADS-B de [ADSB.lol](https://www.adsb.lol/docs/open-data/api/), consultadas cada 20 segundos mientras la página permanece visible. Mediante un servicio HTTPS de AeroSLP que resuelve CORS; sin claves en el navegador.
 - Callsign, matrícula, tipo, altitud, velocidad sobre suelo, track, marcación y distancia, cuando la fuente los proporciona.
 - Selector de seis frecuencias aportadas por el usuario: Torre 118.850, Aproximación 127.500, Centro 1 126.600, Centro 8 127.300, Centro 9 133.100 e Información 122.350 MHz.
 - Candidatos ATC heurísticos, claramente identificados como estimación no oficial. Sin porcentajes de confianza inventados ni atribución de sectores sin polígonos oficiales.
@@ -18,7 +18,7 @@ Aplicación web estática para aficionados a la aviación en San Luis Potosí, M
 
 ADS-B no transmite la frecuencia utilizada. La heurística orienta sobre posibles dependencias, sin servir como fuente operacional. Los umbrales de 8/50 NM y 10,500/20,000 ft son criterios visuales de esta aplicación, no límites oficiales de espacio aéreo. Para tránsito en altura se ofrecen los tres canales de México Centro sin asignar un sector. La altitud no representa altura sobre terreno. El track es dirección de desplazamiento sobre suelo, no rumbo magnético.
 
-La cobertura depende de receptores voluntarios. Posiciones con más de 60 segundos de antigüedad se retiran. Si falla la red, el navegador bloquea CORS o el proveedor limita consultas, se informa el error y se reintenta con espera progresiva; jamás se sustituye el tráfico por datos ficticios. Se conserva la hora de la fuente. No hay un proxy público ni una credencial oculta en el cliente.
+La cobertura depende de receptores voluntarios. Posiciones con más de 60 segundos de antigüedad se retiran. Si falla la red, el navegador bloquea CORS o el proveedor limita consultas, se informa el error y se reintenta con espera progresiva; jamás se sustituye el tráfico por datos ficticios. Se conserva la hora de la fuente. El servicio sólo consulta las coordenadas fijas de MMSP y cuatro radios permitidos. No actúa como proxy de URLs arbitrarias ni incluye credenciales en el cliente.
 
 La base de datos ADSB.lol tiene licencia [ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/). [Documentación de la API](https://api.adsb.lol/docs). Sus límites y disponibilidad pueden cambiar.
 
@@ -32,7 +32,9 @@ La bitácora y los ajustes están en `localStorage` del dispositivo. No hay cuen
 
 ## Desarrollo y publicación
 
-No requiere dependencias ni compilación. Para ejecutar localmente: `python3 -m http.server 8000` desde esta carpeta. Pruebas de lógica: `node --test core.test.cjs`.
+La interfaz de GitHub Pages no requiere dependencias ni compilación. Para ejecutar localmente: `python3 -m http.server 8000` desde esta carpeta. Pruebas de lógica: `node --test core.test.cjs`. El servicio de tráfico permite el origen publicado en GitHub; para una copia de desarrollo, configure su propio servicio y el origen permitido.
+
+Servicio publicado: `https://aeroslp-traffic.vmtsj.chatgpt.site/api/aircraft?radius=140`. Su código está en `traffic-api.ts`: es un Route Handler compatible con Vinext/Next.js, ubicado como `app/api/aircraft/route.ts` en el proyecto de servidor. Se despliega por separado de GitHub Pages en Sites. Usa las APIs estándar Request, Response, fetch y AbortController, caché de 10 segundos, validación de radio, CORS restringido al sitio y tiempo máximo de 8.5 segundos. Para trasladarlo a otro proveedor, cambie el endpoint en `app.js`, configure `ORIGIN` y aumente la versión de `sw.js`.
 
 En GitHub: Settings → Pages → Deploy from a branch → `main` → `/ (root)` → Save. El archivo `.nojekyll` permite servir los archivos estáticos directamente. Todos los recursos usan rutas relativas para funcionar dentro de `/aeroslp/`.
 
