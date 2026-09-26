@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#071522">
+  <meta name="description" content="Radar ADS-B y bitácora personal de escucha para aficionados a la aviación en San Luis Potosí, México.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="AeroSLP">
+  <title>AeroSLP · Radar y radio</title>
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./core.js" defer></script>
+  <script src="./app.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#traffic">Ir al tráfico</a>
+  <div class="app">
+    <header class="masthead">
+      <div class="brand"><img src="./icon.svg" alt="" width="42" height="42"><div><h1>Aero<span>SLP</span></h1><p>Radar y radio · San Luis Potosí</p></div></div>
+      <button id="open-log" class="quiet">Bitácora <span id="log-count" class="counter">0</span></button>
+    </header>
+    <main>
+      <section class="channel-panel" aria-labelledby="channel-title">
+        <div class="section-label"><h2 id="channel-title">Frecuencia de escucha</h2><span>MHz</span></div>
+        <div class="channels" id="channels"></div>
+      </section>
+      <div class="workspace">
+        <section class="radar-panel" aria-labelledby="radar-title">
+          <div class="radar-heading"><div><p class="eyebrow">MMSP · PONCIANO ARRIAGA</p><h2 id="radar-title">Tráfico alrededor de Potosí</h2></div><span class="live-state" id="live-state">Conectando</span></div>
+          <div class="radar-surface"><canvas id="radar" aria-label="Radar centrado en MMSP. Las aeronaves también están disponibles en la lista inferior." role="img"></canvas><div class="radar-caption"><span>NORTE ARRIBA</span><span id="scale-caption">RADIO 140 NM</span></div></div>
+          <div class="radar-controls"><label for="radius">Radio <select id="radius"><option value="40">40 NM</option><option value="80">80 NM</option><option value="140" selected>140 NM</option><option value="200">200 NM</option></select></label><button id="refresh" class="quiet">Actualizar</button><span id="updated">Sin posiciones recibidas</span></div>
+          <div id="connection-message" class="connection" role="status">Consultando la red ADSB.lol…</div>
+          <p class="radar-key"><i class="key-mark"></i> Posición reportada <i class="key-mark selected-mark"></i> Seleccionada <span>NM = millas náuticas</span></p>
+        </section>
+        <aside class="detail-panel" aria-labelledby="detail-title">
+          <div class="detail-head"><p class="eyebrow">AERONAVE SELECCIONADA</p><h2 id="detail-title">Explore el radar</h2><p id="detail-subtitle" class="muted">Toque una aeronave o elija una de la lista.</p></div>
+          <div id="aircraft-detail" class="detail-body"><p class="empty-detail">Callsign, matrícula, tipo y datos de vuelo aparecerán aquí cuando seleccione una posición real.</p></div>
+          <div class="audio-panel"><div class="section-label"><h3>Audio ATC propio</h3><button id="open-audio" class="text-button">Configurar</button></div><p id="audio-status" class="muted">Sin receptor conectado</p><audio id="audio" controls playsinline preload="none" aria-label="Audio del receptor propio" hidden></audio><p class="audio-help">Conecte el stream HTTPS de su receptor físico. El audio se inicia al pulsar reproducir.</p><a class="external" href="https://www.liveatc.net/" target="_blank" rel="noopener noreferrer">Abrir LiveATC ↗</a><span class="external-note">Sitio externo · sin audio integrado</span></div>
+        </aside>
+      </div>
+      <section id="traffic" class="traffic-section" aria-labelledby="traffic-title">
+        <div class="traffic-heading"><div><p class="eyebrow">POSICIONES ADS-B</p><h2 id="traffic-title">En el radar <span id="aircraft-count" class="counter">0</span></h2></div><p id="channel-context" class="muted"></p></div>
+        <div id="traffic-list" class="traffic-list"><p class="empty-state">Esperando la primera consulta de tráfico real…</p></div>
+      </section>
+      <details class="method"><summary>Cómo estimamos las frecuencias y qué significan los datos</summary><p>ADS-B no indica qué frecuencia de radio utiliza una aeronave. AeroSLP sólo propone candidatos orientativos según distancia a MMSP, altitud reportada y ascenso o descenso. No representa una asignación ATC, una probabilidad estadística ni una instrucción operacional.</p><p>Las seis frecuencias fueron proporcionadas por el usuario. No se presentan como una publicación aeronáutica vigente. No contamos con polígonos ni límites verticales oficiales de los sectores 1, 8 y 9: el tránsito en ruta muestra los tres como alternativas sin elegir un sector. Información Potosí tampoco puede deducirse de ADS-B.</p><p>La altitud barométrica se muestra en pies, no es altura sobre el terreno; cuando sólo existe altitud geométrica se indica expresamente. Se muestra rumbo sobre el suelo (track), no orientación magnética del avión. No se extrapolan posiciones. Una aeronave puede faltar por cobertura, equipamiento, antigüedad de posición o datos omitidos por la fuente.</p><p>La bitácora y los ajustes de audio se conservan sólo en este navegador. Exporte la bitácora como respaldo. Borrar datos de Safari o usar navegación privada puede impedir su conservación. El proveedor ADS-B recibe las consultas de tráfico; no se envía su bitácora.</p></details>
+    </main>
+    <footer><p>Sólo para aficionados. <strong>No utilizar para navegación ni decisiones de vuelo.</strong></p><p>Datos: <a href="https://www.adsb.lol/docs/open-data/api/" target="_blank" rel="noopener noreferrer">ADSB.lol</a> · <a href="https://opendatacommons.org/licenses/odbl/1-0/" target="_blank" rel="noopener noreferrer">ODbL 1.0</a> <span class="version">AeroSLP 1.0</span></p></footer>
+  </div>
+  <dialog id="log-dialog" aria-labelledby="log-title"><div class="dialog-heading"><div><p class="eyebrow">EN ESTE DISPOSITIVO</p><h2 id="log-title">Mi bitácora</h2></div><button class="quiet" data-close="log-dialog" aria-label="Cerrar bitácora">Cerrar</button></div><form id="log-form"><div class="form-grid"><label>Callsign o matrícula<input id="log-call" required maxlength="40" autocomplete="off" placeholder="Ej. AMX1532"></label><label>Frecuencia escuchada<select id="log-frequency"></select></label></div><label>Nota de escucha<textarea id="log-note" rows="2" maxlength="500" placeholder="Lo que escuchó en su receptor…"></textarea></label><p class="muted">La selección de una aeronave no confirma una escucha. Registre sólo lo que haya escuchado.</p><button class="primary" type="submit">Guardar escucha</button><p id="log-feedback" class="feedback" role="status"></p></form><div class="log-heading"><h3>Registros guardados</h3><button id="export-log" class="quiet">Exportar CSV</button></div><div id="log-entries"></div></dialog>
+  <dialog id="audio-dialog" aria-labelledby="audio-title"><div class="dialog-heading"><h2 id="audio-title">Conectar mi receptor</h2><button class="quiet" data-close="audio-dialog">Cerrar</button></div><p id="audio-channel" class="channel-label"></p><form id="audio-form"><label>Nombre del receptor<input id="audio-name" maxlength="80" placeholder="Receptor SLP"></label><label>URL HTTPS del stream<input id="audio-url" type="url" inputmode="url" autocomplete="off" placeholder="https://su-servidor/stream.mp3"></label><p class="muted">Use únicamente su propio audio o uno autorizado. MP3 y AAC dependen del formato que admita el navegador; Safari puede reproducir HLS nativo. LiveATC se abre únicamente en su sitio externo. No guarde contraseñas ni claves en la URL.</p><div class="actions"><button class="primary" type="submit">Guardar conexión</button><button id="remove-audio" class="quiet" type="button">Quitar conexión</button></div><p id="audio-feedback" class="feedback" role="status"></p></form></dialog>
+  <div id="toast" class="toast" role="status" hidden></div>
+  <noscript><p class="noscript">AeroSLP necesita JavaScript para consultar el radar y guardar su bitácora. Actívelo en su navegador.</p></noscript>
+</body>
+</html>

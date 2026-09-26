@@ -1,2 +1,41 @@
-# aeroslp
-Radar ADS-B y bitácora de escucha para aficionados a la aviación en San Luis Potosí.
+# AeroSLP
+
+Aplicación web estática para aficionados a la aviación en San Luis Potosí, México. Aeropuerto base: MMSP / Aeropuerto Internacional Ponciano Arriaga.
+
+## Funciones
+
+- Radar polar con norte arriba y radios de 40, 80, 140 y 200 NM, centrado en 22.25426172, -100.9307605.
+- Posiciones ADS-B de [ADSB.lol](https://www.adsb.lol/docs/open-data/api/), consultadas cada 20 segundos mientras la página permanece visible. Sin claves ni servidor propio.
+- Callsign, matrícula, tipo, altitud, velocidad sobre suelo, track, marcación y distancia, cuando la fuente los proporciona.
+- Selector de seis frecuencias aportadas por el usuario: Torre 118.850, Aproximación 127.500, Centro 1 126.600, Centro 8 127.300, Centro 9 133.100 e Información 122.350 MHz.
+- Candidatos ATC heurísticos, claramente identificados como estimación no oficial. Sin porcentajes de confianza inventados ni atribución de sectores sin polígonos oficiales.
+- Bitácora local de escuchas y exportación CSV. Los registros existentes con clave `aeroslp.logs` se conservan.
+- Configuración de un stream propio HTTPS por frecuencia y controles nativos de audio. Safari admite formatos según su reproductor; HLS depende de soporte nativo. No hay reproducción automática.
+- LiveATC se abre exclusivamente en un enlace externo. No se incrusta, consulta ni redistribuye su audio.
+- Diseño adaptable, controles táctiles, etiquetas accesibles y caché del armazón para consultar frecuencias y bitácora sin conexión después de una primera visita correcta.
+
+## Límites de los datos
+
+ADS-B no transmite la frecuencia utilizada. La heurística orienta sobre posibles dependencias, sin servir como fuente operacional. Los umbrales de 8/50 NM y 10,500/20,000 ft son criterios visuales de esta aplicación, no límites oficiales de espacio aéreo. Para tránsito en altura se ofrecen los tres canales de México Centro sin asignar un sector. La altitud no representa altura sobre terreno. El track es dirección de desplazamiento sobre suelo, no rumbo magnético.
+
+La cobertura depende de receptores voluntarios. Posiciones con más de 60 segundos de antigüedad se retiran. Si falla la red, el navegador bloquea CORS o el proveedor limita consultas, se informa el error y se reintenta con espera progresiva; jamás se sustituye el tráfico por datos ficticios. Se conserva la hora de la fuente. No hay un proxy público ni una credencial oculta en el cliente.
+
+La base de datos ADSB.lol tiene licencia [ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/). [Documentación de la API](https://api.adsb.lol/docs). Sus límites y disponibilidad pueden cambiar.
+
+## Audio propio
+
+Conectar un receptor físico a un codificador/servidor de streaming que entregue MP3, AAC o un formato que el navegador admita. Publicar ese audio mediante HTTPS y configurar su URL en el canal correspondiente. El servidor, receptor y permisos sobre el audio no forman parte de este repositorio. No incluir claves privadas en URLs. La configuración sólo vive en el navegador y no se publica en GitHub.
+
+## Privacidad y persistencia
+
+La bitácora y los ajustes están en `localStorage` del dispositivo. No hay cuenta de AeroSLP ni sincronización. El borrado de datos del navegador los elimina; exportar CSV para respaldo. El proveedor ADS-B recibe consultas de tráfico, pero no la bitácora. No se solicita geolocalización. Los datos externos se escapan antes de mostrarse.
+
+## Desarrollo y publicación
+
+No requiere dependencias ni compilación. Para ejecutar localmente: `python3 -m http.server 8000` desde esta carpeta. Pruebas de lógica: `node --test core.test.cjs`.
+
+En GitHub: Settings → Pages → Deploy from a branch → `main` → `/ (root)` → Save. El archivo `.nojekyll` permite servir los archivos estáticos directamente. Todos los recursos usan rutas relativas para funcionar dentro de `/aeroslp/`.
+
+El service worker sólo guarda recursos de esta aplicación; nunca almacena ni intercepta ADS-B o audio externo. Al cambiar recursos, incrementar la versión de caché en `sw.js`.
+
+**No utilizar para navegación, separación de aeronaves ni decisiones de vuelo.**
