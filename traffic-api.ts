@@ -12,8 +12,8 @@ async function upstream(radius:string):Promise<string>{
   const job=(async()=>{
     const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),8500);
     try{
-      const response=await fetch('https://api.adsb.lol/v2/lat/22.25426172/lon/-100.9307605/dist/'+radius,{signal:controller.signal,headers:{Accept:'application/json'},cache:'no-store'});
-      if(!response.ok)throw new Error('upstream '+response.status);
+      const response=await fetch('https://opendata.adsb.fi/api/v3/lat/22.25426172/lon/-100.9307605/dist/'+radius,{signal:controller.signal,headers:{Accept:'application/json','User-Agent':'AeroSLP/1.0 (https://github.com/victorressj/aeroslp)'},cache:'no-store'});
+      if(!response.ok){const detail=(await response.text()).replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').slice(0,180);throw new Error('upstream '+response.status+' '+detail);}
       const body=await response.text();if(body.length>2000000)throw new Error('response too large');
       const data=JSON.parse(body);if(!Array.isArray(data.ac)||typeof data.now!=='number')throw new Error('invalid response');
       const now=data.now<1e12?data.now*1000:data.now;if(Date.now()-now>120000||now>Date.now()+60000)throw new Error('stale response');
@@ -26,5 +26,5 @@ export async function GET(request:Request){
   const origin=request.headers.get('origin');if(origin&&origin!==ORIGIN)return reply(JSON.stringify({error:'Origen no autorizado.'}),403);
   const radius=new URL(request.url).searchParams.get('radius')||'140';
   if(!allowed.has(radius))return reply(JSON.stringify({error:'Radio no válido. Use 40, 80, 140 o 200 NM.'}),400);
-  try{return reply(await upstream(radius));}catch(error){return reply(JSON.stringify({error:'El proveedor ADS-B no está disponible temporalmente. Reintente en unos segundos.'}),502);}
+  try{return reply(await upstream(radius));}catch(error){console.error('ADSB upstream:',error instanceof Error?error.message:'unknown failure');return reply(JSON.stringify({error:'El proveedor ADS-B no está disponible temporalmente. Reintente en unos segundos.'}),502);}
 }

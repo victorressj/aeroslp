@@ -55,7 +55,7 @@
     $('refresh').disabled=state.busy;
     $('updated').textContent=state.sourceTime?'Hora de fuente: '+new Date(state.sourceTime).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',second:'2-digit'}):'Sin posiciones recibidas';
     $('connection-message').className='connection'+(state.error||old?' error':'');
-    $('connection-message').textContent=state.error|| (old?'La fuente devolvió datos antiguos. No se muestran como tráfico actual.':state.received?'Consulta cada 20 s mientras la app está visible. Posiciones de más de 60 s se retiran.':'Consultando la red ADSB.lol…');
+    $('connection-message').textContent=state.error|| (old?'La fuente devolvió datos antiguos. No se muestran como tráfico actual.':state.received?'Consulta cada 20 s mientras la app está visible. Posiciones de más de 60 s se retiran.':'Consultando la red adsb.fi…');
   }
   function render(){renderStatus();renderTraffic();renderDetail();drawRadar();}
   async function refresh(){

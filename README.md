@@ -5,7 +5,7 @@ Aplicación web estática para aficionados a la aviación en San Luis Potosí, M
 ## Funciones
 
 - Radar polar con norte arriba y radios de 40, 80, 140 y 200 NM, centrado en 22.25426172, -100.9307605.
-- Posiciones ADS-B de [ADSB.lol](https://www.adsb.lol/docs/open-data/api/), consultadas cada 20 segundos mientras la página permanece visible. Mediante un servicio HTTPS de AeroSLP que resuelve CORS; sin claves en el navegador.
+- Posiciones ADS-B de [adsb.fi](https://adsb.fi/), consultadas cada 20 segundos mientras la página permanece visible. Mediante un servicio HTTPS de AeroSLP que resuelve CORS; sin claves en el navegador.
 - Callsign, matrícula, tipo, altitud, velocidad sobre suelo, track, marcación y distancia, cuando la fuente los proporciona.
 - Selector de seis frecuencias aportadas por el usuario: Torre 118.850, Aproximación 127.500, Centro 1 126.600, Centro 8 127.300, Centro 9 133.100 e Información 122.350 MHz.
 - Candidatos ATC heurísticos, claramente identificados como estimación no oficial. Sin porcentajes de confianza inventados ni atribución de sectores sin polígonos oficiales.
@@ -20,7 +20,7 @@ ADS-B no transmite la frecuencia utilizada. La heurística orienta sobre posible
 
 La cobertura depende de receptores voluntarios. Posiciones con más de 60 segundos de antigüedad se retiran. Si falla la red, el navegador bloquea CORS o el proveedor limita consultas, se informa el error y se reintenta con espera progresiva; jamás se sustituye el tráfico por datos ficticios. Se conserva la hora de la fuente. El servicio sólo consulta las coordenadas fijas de MMSP y cuatro radios permitidos. No actúa como proxy de URLs arbitrarias ni incluye credenciales en el cliente.
 
-La base de datos ADSB.lol tiene licencia [ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/). [Documentación de la API](https://api.adsb.lol/docs). Sus límites y disponibilidad pueden cambiar.
+Los datos de adsb.fi se utilizan sólo para uso personal y no comercial, con atribución y enlace a su sitio. [Condiciones y documentación de la API](https://github.com/adsbfi/opendata). Sus límites y disponibilidad pueden cambiar. El servicio aplica una caché breve para reducir las consultas; no garantiza cobertura completa ni continuidad.
 
 ## Audio propio
 
