@@ -1,7 +1,7 @@
 (function(){
   'use strict';
   const C=window.AeroCore, F=C.FREQUENCIES, $=id=>document.getElementById(id);
-  const state={channel:'app',radius:140,aircraft:[],selected:null,sourceTime:null,received:null,error:'',busy:false,request:0,failures:0};
+  const state={channel:'app',radius:140,aircraft:[],selected:null,sourceTime:null,received:null,error:'',busy:false,request:0,failures:0,accessDenied:false};
   let timer=null,controller=null,canvasPoints=[],toastTimer=null,returnFocus=null;
   const storage={read(key,fallback){try{const v=localStorage.getItem(key);return v?JSON.parse(v):fallback;}catch(e){return fallback;}},write(key,value){try{localStorage.setItem(key,JSON.stringify(value));return true;}catch(e){return false;}}};
   const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -59,17 +59,19 @@
   }
   function render(){renderStatus();renderTraffic();renderDetail();drawRadar();}
   async function refresh(){
+    if(state.accessDenied)return;
     clearTimeout(timer);if(controller)controller.abort();
     const token=++state.request;controller=new AbortController();const ctl=controller;state.busy=true;renderStatus();
     const timeout=setTimeout(()=>ctl.abort(),12000);
     try{
       const url='https://aeroslp-traffic.vmtsj.chatgpt.site/api/aircraft?radius='+state.radius;
       const response=await fetch(url,{mode:'cors',credentials:'omit',cache:'no-store',signal:ctl.signal});
+      if(response.status===503){let failure={};try{failure=await response.json();}catch(e){}if(failure.code==='SOURCE_ACCESS_DENIED'){const error=new Error('La fuente bloqueó el acceso del servidor. Radar pendiente de conexión autorizada. Las frecuencias y la bitácora siguen disponibles.');error.accessDenied=true;throw error;}}
       if(!response.ok)throw new Error(response.status===429?'La fuente limitó temporalmente las consultas. Reintentaremos automáticamente.':'El proveedor ADS-B respondió con error '+response.status+'.');
       const data=C.normalize(await response.json(),Date.now());if(token!==state.request)return;
       state.aircraft=data.aircraft;state.sourceTime=data.sourceTime;state.received=Date.now();state.error='';state.failures=0;
-    }catch(error){if(token!==state.request)return;state.failures++;state.error=error.name==='AbortError'?'La consulta ADS-B agotó el tiempo de espera. Reintentaremos automáticamente.':error instanceof TypeError?'No se pudo conectar con el servicio ADS-B. Revise su conexión; reintentaremos automáticamente.':error.message;}
-    finally{clearTimeout(timeout);if(token===state.request){state.busy=false;render();if(!document.hidden)timer=setTimeout(refresh,state.failures?Math.min(120000,30000*state.failures):20000);}}
+    }catch(error){if(token!==state.request)return;state.failures++;state.accessDenied=Boolean(error.accessDenied);state.error=error.name==='AbortError'?'La consulta ADS-B agotó el tiempo de espera. Reintentaremos automáticamente.':error instanceof TypeError?'No se pudo conectar con el servicio ADS-B. Revise su conexión; reintentaremos automáticamente.':error.message;}
+    finally{clearTimeout(timeout);if(token===state.request){state.busy=false;render();if(!document.hidden&&!state.accessDenied)timer=setTimeout(refresh,state.failures?Math.min(120000,30000*state.failures):20000);}}
   }
   function openDialog(id){returnFocus=document.activeElement;const d=$(id);if(typeof d.showModal==='function')d.showModal();else d.setAttribute('open','');}
   function closeDialog(id){const d=$(id);if(typeof d.close==='function')d.close();else d.removeAttribute('open');if(returnFocus&&returnFocus.isConnected)returnFocus.focus();}
@@ -88,7 +90,7 @@
   $('aircraft-detail').addEventListener('click',e=>{if(e.target.closest('#log-selected'))openLog();});
   $('radar').addEventListener('click',e=>{const r=$('radar').getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;const nearest=canvasPoints.map(p=>({...p,d:Math.hypot(p.x-x,p.y-y)})).sort((a,b)=>a.d-b.d)[0];if(nearest&&nearest.d<=25)choose(nearest.hex,false);});
   $('radius').addEventListener('change',()=>{state.radius=Number($('radius').value);$('scale-caption').textContent='RADIO '+state.radius+' NM';render();refresh();});
-  $('refresh').addEventListener('click',refresh);$('open-log').addEventListener('click',openLog);$('log-form').addEventListener('submit',saveLog);$('export-log').addEventListener('click',exportLogs);
+  $('refresh').addEventListener('click',()=>{state.accessDenied=false;refresh();});$('open-log').addEventListener('click',openLog);$('log-form').addEventListener('submit',saveLog);$('export-log').addEventListener('click',exportLogs);
   $('log-entries').addEventListener('click',e=>{const b=e.target.closest('[data-delete]');if(!b)return;if(!window.confirm('¿Eliminar este registro de su bitácora?'))return;const list=logs();list.splice(Number(b.dataset.delete),1);if(storage.write('aeroslp.logs',list))renderLogs();else $('log-feedback').textContent='No se pudo eliminar el registro.';});
   $('open-audio').addEventListener('click',openAudio);$('audio-form').addEventListener('submit',saveAudio);$('remove-audio').addEventListener('click',()=>{$('audio-url').value='';$('audio-name').value='';$('audio-form').requestSubmit();});
   $('audio').addEventListener('error',()=>{if($('audio').getAttribute('src'))$('audio-status').textContent='No se pudo reproducir. Revise HTTPS, disponibilidad y formato del stream.';});

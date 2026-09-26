@@ -41,3 +41,11 @@ En GitHub: Settings → Pages → Deploy from a branch → `main` → `/ (root)`
 El service worker sólo guarda recursos de esta aplicación; nunca almacena ni intercepta ADS-B o audio externo. Al cambiar recursos, incrementar la versión de caché en `sw.js`.
 
 **No utilizar para navegación, separación de aeronaves ni decisiones de vuelo.**
+
+## Estado verificado · 26 de septiembre de 2026
+
+La interfaz está publicada en https://victorressj.github.io/aeroslp/ desde `main`. Se probaron el selector, la persistencia y exportación CSV de la bitácora, y el rechazo de audio HTTP o de LiveATC. La interfaz se revisó en Chrome con marcos de 390 y 320 píxeles, sin desbordamiento horizontal; no se probó un iPhone físico ni Safari.
+
+**Pendiente: tráfico en vivo.** ADSB.lol y adsb.fi devolvieron HTTP 403 al servicio de consulta alojado; adsb.fi mostró una página de seguridad de Cloudflare. El navegador alcanza el servicio con CORS correcto, pero éste no puede obtener las posiciones. Se necesita una fuente que autorice consultas desde este alojamiento (o un endpoint de un receptor propio). No se sortea el bloqueo ni se muestran posiciones ficticias. Ante este rechazo se detiene el sondeo automático y el servidor aplica una pausa de 15 minutos.
+
+El audio requiere que el usuario configure el stream HTTPS real de su receptor; no se ha probado reproducción con ese equipo.
