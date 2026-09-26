@@ -49,3 +49,9 @@ La interfaz está publicada en https://victorressj.github.io/aeroslp/ desde `mai
 **Pendiente: tráfico en vivo.** ADSB.lol y adsb.fi devolvieron HTTP 403 al servicio de consulta alojado; adsb.fi mostró una página de seguridad de Cloudflare. El navegador alcanza el servicio con CORS correcto, pero éste no puede obtener las posiciones. Se necesita una fuente que autorice consultas desde este alojamiento (o un endpoint de un receptor propio). No se sortea el bloqueo ni se muestran posiciones ficticias. Ante este rechazo se detiene el sondeo automático y el servidor aplica una pausa de 15 minutos.
 
 El audio requiere que el usuario configure el stream HTTPS real de su receptor; no se ha probado reproducción con ese equipo.
+
+## Flightradar24 Gold
+
+AeroSLP incluye un acceso externo a https://www.flightradar24.com/. Allí puede buscar MMSP / San Luis Potosí y usar su cuenta Gold. El enlace no importa aeronaves ni sincroniza la bitácora; no requiere compartir las credenciales con AeroSLP.
+
+Gold es una suscripción al sitio y a las aplicaciones de Flightradar24. No incluye su API, que requiere un plan independiente. Véase la [comparación oficial de planes](https://www.flightradar24.com/premium). No se ha conectado una API de Flightradar24 ni se ha contratado un servicio adicional. La verificación automática del mapa quedó bloqueada por su página de seguridad en el navegador de Work; el enlace apunta a su página oficial.

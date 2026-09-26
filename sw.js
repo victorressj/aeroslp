@@ -1,5 +1,5 @@
 'use strict';
-const CACHE='aeroslp-shell-v4';
+const CACHE='aeroslp-shell-v5';
 const SHELL=['./','./index.html','./styles.css','./core.js','./app.js','./icon.svg','./manifest.webmanifest'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('aeroslp-shell-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
